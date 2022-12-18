@@ -1,16 +1,74 @@
-const http= require('http');
-const express = require('express');
-const app = express();
+var express = require('express');
+  
 
-//recursos(permite que el css conecte con html)
-app.use(express.static(__dirname+'/'));
+var app = express();
 
-//Enrutamiento
-app.get('/',(req,res) => {
-    res.sendFile("/home/ubuntu/Colegio-Asia-Lainding-Page/index.html")
+
+app.use(express.urlencoded({ extended: true }));
+app.use(express.static(__dirname + '/'));
+
+app.get('/', function (req, res) {
+	res.sendFile(__dirname + "/index.html");
 });
 
+app.get('/login', function (req, res) {
+	res.sendFile(__dirname + "/login.html");
+});
 
-app.listen(3000);
-console.log('server on port 3000');
+const puerto = process.env.PUERTO || 3000;
+
+app.listen(puerto, function () {
+  console.log("Servidor funcionando en puerto: " + puerto);
+});
+
+//Recursos
+app.use(express.static(__dirname+'/'));
+
+
+
+
+
+
+var mysql = require("mysql");
+
+var cors = require("cors");
+
+app.use(express.json());
+app.use(cors());
+
+var conexion = mysql.createConnection({
+  host: "34.234.161.23",
+  user: "frank",
+  password: "1234",
+  database: "dbRestaurante",
+});
+
+conexion.connect(function (error) {
+    if (error) {
+      throw error;
+    } else {
+      console.log("Conexión exitosa");
+    }
+  });
+
+  
+
+app.post("/api/pedido", (req, res) => {
+	let data = {
+    	userped: req.body.USERPED,
+    	emausped: req.body.EMAUSPED,
+    	celusped: req.body.CELUSPED,
+    	foodped: req.body.FOODPED,
+    	msgped: req.body.MSGPED
+	};
+	let sql = "INSERT INTO pedido SET ?";
+	conexion.query(sql, data, function (error, results) {
+  	if (error) {
+    	throw error;
+  	} else {
+    	console.log(data);
+    	res.send(data);
+  	}
+	});
+  });
 
